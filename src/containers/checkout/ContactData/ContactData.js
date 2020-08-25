@@ -54,7 +54,7 @@ export class ContactData extends Component {
         elementConfig: {
           options: [
             { value: "fastest", displayValue: "Fastest" },
-            { value: "cheapst", displayValue: "Cheapest" },
+            { value: "cheapest", displayValue: "Cheapest" },
           ],
         },
         value: "",
@@ -67,9 +67,16 @@ export class ContactData extends Component {
     console.log(this.props.ingredients);
     this.setState({ loading: true });
     // alert("continue");
+    const formData = {};
+    for (let formElementIdentifier in this.state.orderForm) {
+      formData[formElementIdentifier] = this.state.orderForm[
+        formElementIdentifier
+      ].value;
+    }
     const order = {
       ingredients: this.props.ingredients,
       price: this.props.price,
+      orderData: formData,
     };
 
     axios
@@ -81,6 +88,19 @@ export class ContactData extends Component {
       .catch((error) => this.setState({ loading: false }));
   };
 
+  inputChangedHandler = (event, inputIdentifier) => {
+    console.log(event.target.value);
+    const updatedOrderForm = {
+      ...this.state.orderForm,
+    };
+    const updatedFormElement = { ...updatedOrderForm[inputIdentifier] };
+    updatedFormElement.value = event.target.value;
+    updatedOrderForm[inputIdentifier] = updatedFormElement;
+    this.setState({
+      orderForm: updatedOrderForm,
+    });
+  };
+
   render() {
     const formElementsArray = [];
     for (let key in this.state.orderForm) {
@@ -90,13 +110,14 @@ export class ContactData extends Component {
       });
     }
     let form = (
-      <form>
+      <form onSubmit={this.orderHandler}>
         {formElementsArray.map((formElement) => (
           <Input
             key={formElement.id}
             elementType={formElement.config.elementType}
             elementConfig={formElement.config.elementConfig}
             value={formElement.config.value}
+            changed={(event) => this.inputChangedHandler(event, formElement.id)}
           />
         ))}
 
